@@ -1,0 +1,219 @@
+// write your code here
+//crop image function + hide function
+//chop and give zeros function
+
+var image = new SimpleImage("smalllion.jpg");
+var imageHidden = new SimpleImage("chapel.png");
+
+//start values
+var w = imageHidden.getWidth();
+var h = imageHidden.getHeight();
+
+//test printing
+print("Image =");
+print("Width and height = ", image.getWidth(), " X ", image.getHeight());
+print(image);
+print("ImageHidden =");
+print("Width and height = ", imageHidden.getWidth(), " X ", imageHidden.getHeight());
+print(imageHidden);
+
+//set ideal w and h for cropped pictures
+if (image.getWidth()<=imageHidden.getWidth()){
+    w = image.getWidth();
+}
+if (image.getHeight()<=imageHidden.getHeight()){
+    h = image.getHeight();
+}
+print("Found ideal width and height for cropping = ", w, " and ", h)
+
+//FUNCTIONS
+
+//chop function sets 1st 4 bits to zeroes
+function chop2Hide(img){
+    
+    for (var px of img.values()){
+        
+        var r = px.getRed();
+        var g = px.getGreen();
+        var b = px.getBlue();
+        
+// Use Bitwise Operators to make 1st 4 bits zero
+// AND 0xf0 (hex) / 11110000 (binary) / 240 (base 10)
+        var rRes = r & 0xf0;
+        var gRes = g & 0xf0;
+        var bRes = b & 0xf0;
+
+        px.setRed(rRes);
+        px.setGreen(gRes);
+        px.setBlue(bRes);
+    }
+    return img;
+}
+
+//Merge function: most important Byte of picImport mergede with 1st 4 bits 
+function chop2Hide(img){
+    
+    for (var px of img.values()){
+        
+        var r = px.getRed();
+        var g = px.getGreen();
+        var b = px.getBlue();
+        
+// Use Bitwise Operators to make 1st 4 bits zero
+// AND 0xf0 (hex) / 11110000 (binary) / 240 (base 10)
+        var rRes = r & 0xf0;
+        var gRes = g & 0xf0;
+        var bRes = b & 0xf0;
+
+        px.setRed(rRes);
+        px.setGreen(gRes);
+        px.setBlue(bRes);
+    }
+}
+
+//function pixChange moves the 4 last bits to the position of the first 4
+// fx 11010011 -> 00001101
+function pixChange(img){
+    
+    for (var px of img.values()){
+        
+        var r = px.getRed();
+        var g = px.getGreen();
+        var b = px.getBlue();
+        
+        //bitwise operator moves bits four steps to the right
+        var rRes = r >>> 4;
+        var gRes = g >>> 4;
+        var bRes = b >>> 4;
+
+        px.setRed(rRes);
+        px.setGreen(gRes);
+        px.setBlue(bRes);
+    }
+}
+
+//Function to crop a picture
+function crop(img, width, height) {
+    
+    var imgOut = new SimpleImage(width, height);
+    
+    for (var px of img.values() ){
+        
+        var x = px.getX();
+        var y = px.getY();
+        var outPixel = img.getPixel(x,y);
+        
+        if (x < width && y < height){
+        imgOut.setPixel(x, y, outPixel);
+        }
+    }
+    return imgOut;
+}
+
+function hideImage(image, imageHide){
+    
+    //start values
+    var w = imageHide.getWidth();
+    var h = imageHide.getHeight();
+    
+    //set ideal w and h for cropped pictures
+    if (image.getWidth()<=imageHide.getWidth()){
+    w = image.getWidth();
+    }
+    if (image.getHeight()<=imageHide.getHeight()){
+    h = image.getHeight();
+    }
+    
+    //crop both pics
+    crop(image, w, h);
+    crop(imageHide, w, h);
+    
+    //prepare both pics bit wise
+    chop2Hide(image);
+    pixChange(imageHide);
+    
+    //Merge the to pics to one
+    var imageOut = new SimpleImage(w, h);
+    
+    for (var pxA of image.values()){
+        
+        //pixel position
+        var x = pxA.getX();
+        var y = pxA.getY();
+        
+        //pixelHide
+        var pxB = imageHide.getPixel(x, y);
+        //empty pixelOut
+        var pxC = imageOut.getPixel(x, y);    
+    
+        //RGB values of image
+        var rA = pxA.getRed();
+        var gA = pxA.getGreen();
+        var bA = pxA.getBlue();
+        
+        //RGB values of imageHide
+        var rB = pxB.getRed();
+        var gB = pxB.getGreen();
+        var bB = pxB.getBlue();
+        
+        //Bitwise operation OR
+        var rC = rA | rB;
+        var gC = gA | gB;
+        var bC = bA | bB;
+    
+        //set out pixel
+        pxC.setRed(rC);
+        pxC.setGreen(gC);
+        pxC.setBlue(bC);
+    }
+    return imageOut;
+}
+
+//Crop two images
+image = crop(image, w, h);
+imageHidden = crop(imageHidden, w, h);
+
+print(image);
+print("Cropped images up and down");
+print(imageHidden);
+print("TEST: Cropped size W x H = ", 
+    image.getWidth()," X ", 
+    image.getHeight());
+
+//Test and print of chopped image
+print("TEST: Values before chop = ", 
+    image.getRed(50,50), 
+    " Binary = ", 
+    image.getRed(50,50).toString(2));
+chop2Hide(image);
+print("TEST: Values after chop = ", 
+    image.getRed(50,50), 
+    " Binary = ", 
+    image.getRed(50,50).toString(2));
+print("(Container)Image with 0 as least important byte = ");
+print(image);
+
+//TEST
+var imageA = new SimpleImage("usain.jpg");
+var imageB = new SimpleImage("palm-and-beach.png");
+var imageC = new SimpleImage("skyline.jpg");
+print("imageA and imageB and imageC =");
+print(imageA, imageB, imageC);
+
+//test of PixChange
+//test printing
+print("TEST: Values before pixChange = ", 
+    imageC.getRed(100,100), " Binary = ", 
+    imageC.getRed(100,100).toString(2));
+pixChange(imageC);
+print("TEST: Values after change = ", 
+    imageC.getRed(100,100), " Binary = ", 
+    imageC.getRed(100,100).toString(2));
+print("ImageC after function PixChange =")
+print(imageC);
+
+//TEST: hideImage()
+var testImage = hideImage(imageA, imageB);
+print("hideImage(imageA, imageB) = ");
+print(testImage);
+
